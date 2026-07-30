@@ -15,27 +15,32 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
     {
       path: "/",
       label: "Dashboard",
-      icon: <HiSquares2X2 className="w-4.5 h-4.5" />,
+      icon: HiSquares2X2,
+      iconColor: "",
     },
     {
       path: "/add-income",
       label: "Add Income",
-      icon: <HiArrowTrendingUp className="w-4.5 h-4.5 text-emerald-500" />,
+      icon: HiArrowTrendingUp,
+      iconColor: "text-emerald-500",
     },
     {
       path: "/add-expense",
       label: "Add Expense",
-      icon: <HiArrowTrendingDown className="w-4.5 h-4.5 text-red-500" />,
+      icon: HiArrowTrendingDown,
+      iconColor: "text-red-500",
     },
     {
       path: "/transactions",
       label: "Transaction List",
-      icon: <HiListBullet className="w-4.5 h-4.5" />,
+      icon: HiListBullet,
+      iconColor: "",
     },
     {
       path: "/statistics",
       label: "Financial Statistics & Analytics",
-      icon: <HiChartBar className="w-4.5 h-4.5" />,
+      icon: HiChartBar,
+      iconColor: "",
     },
   ];
 
@@ -80,6 +85,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
             </span>
             <nav className="mt-2.5 space-y-1">
               {navItems.map((item) => {
+                const IconComponent = item.icon;
                 return (
                   <NavLink
                     key={item.path}
@@ -94,8 +100,16 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
                       }`
                     }
                   >
-                    <span>{item.icon}</span>
-                    <span>{item.label}</span>
+                    {({ isActive }) => (
+                      <>
+                        <IconComponent
+                          className={`w-4.5 h-4.5 shrink-0 ${
+                            isActive ? "text-white" : item.iconColor
+                          }`}
+                        />
+                        <span>{item.label}</span>
+                      </>
+                    )}
                   </NavLink>
                 );
               })}
