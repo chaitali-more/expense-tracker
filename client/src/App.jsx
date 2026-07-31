@@ -162,9 +162,15 @@ const App = () => {
     console.log("Data:", res.data);
     console.log("Is Array:", Array.isArray(res.data));
 
-    setTransactions(res.data);
+    if (res && res.data && Array.isArray(res.data)) {
+      setTransactions(res.data);
+    } else {
+      console.warn("API returned non-array data, fallback to empty array");
+      setTransactions([]);
+    }
   } catch (error) {
-    console.log(error);
+    console.log("Error fetching transactions:", error);
+    setTransactions([]);
   }
 };
   return (
