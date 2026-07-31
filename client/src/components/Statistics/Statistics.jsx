@@ -84,7 +84,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 const Statistics = ({ Transactions = [] }) => {
   // 1. Compute Expense by Category (Pie Chart Data)
   const categoryPieData = useMemo(() => {
-    const expenses = Transactions.filter((tx) => tx.transactionType === "expense");
+    const expenses = Transactions.filter((tx) => tx.type === "expense");
 
     if (expenses.length === 0) return DEFAULT_EXPENSE_PIE;
 
@@ -111,12 +111,12 @@ const Statistics = ({ Transactions = [] }) => {
 
     const dateGroup = {};
     Transactions.forEach((tx) => {
-      const dateKey = tx.transactionDate || "Recent";
+      const dateKey = tx.date ? new Date(tx.date).toISOString().split('T')[0] : "Recent";
       if (!dateGroup[dateKey]) {
         dateGroup[dateKey] = { date: dateKey, Income: 0, Expense: 0 };
       }
       const amt = Number(tx.amount) || 0;
-      if (tx.transactionType === "income") {
+      if (tx.type === "income") {
         dateGroup[dateKey].Income += amt;
       } else {
         dateGroup[dateKey].Expense += amt;
@@ -128,13 +128,13 @@ const Statistics = ({ Transactions = [] }) => {
 
   // 3. Compute Spending Trend (Line Chart Data)
   const spendingTrendData = useMemo(() => {
-    const expenses = Transactions.filter((tx) => tx.transactionType === "expense");
+    const expenses = Transactions.filter((tx) => tx.type === "expense");
 
     if (expenses.length === 0) return DEFAULT_SPENDING_TREND;
 
     const dateMap = {};
     expenses.forEach((tx) => {
-      const d = tx.transactionDate || "Today";
+      const d = tx.date ? new Date(tx.date).toISOString().split('T')[0] : "Today";
       dateMap[d] = (dateMap[d] || 0) + Number(tx.amount || 0);
     });
 
@@ -144,8 +144,8 @@ const Statistics = ({ Transactions = [] }) => {
   }, [Transactions]);
 
   // Summary Metrics
-  const totalIncomeVal = Transactions.filter((t) => t.transactionType === "income").reduce((s, t) => s + Number(t.amount || 0), 0);
-  const totalExpenseVal = Transactions.filter((t) => t.transactionType === "expense").reduce((s, t) => s + Number(t.amount || 0), 0);
+  const totalIncomeVal = Transactions.filter((t) => t.type === "income").reduce((s, t) => s + Number(t.amount || 0), 0);
+  const totalExpenseVal = Transactions.filter((t) => t.type === "expense").reduce((s, t) => s + Number(t.amount || 0), 0);
 
   return (
     <div className="space-y-8">
@@ -248,7 +248,7 @@ const Statistics = ({ Transactions = [] }) => {
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
                 <HiChartBar className="w-4.5 h-4.5" />
               </div>
               <div>
@@ -256,7 +256,7 @@ const Statistics = ({ Transactions = [] }) => {
                 <p className="text-[11px] text-slate-400 font-medium">Comparison of inflows & outflows</p>
               </div>
             </div>
-            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
               Bar Chart
             </span>
           </div>
@@ -265,7 +265,20 @@ const Statistics = ({ Transactions = [] }) => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={incomeVsExpenseData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <XAxis 
+                  dataKey="date" 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tick={{ fontSize: 11, fill: "#64748b" }} 
+                  tickFormatter={(str) => {
+                    if (!str || str === "Recent") return str;
+                    try {
+                      return new Date(str).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+                    } catch {
+                      return str;
+                    }
+                  }}
+                />
                 <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: "11px" }} />
@@ -297,7 +310,20 @@ const Statistics = ({ Transactions = [] }) => {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={spendingTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <XAxis 
+                  dataKey="date" 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tick={{ fontSize: 11, fill: "#64748b" }} 
+                  tickFormatter={(str) => {
+                    if (!str || str === "Today") return str;
+                    try {
+                      return new Date(str).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+                    } catch {
+                      return str;
+                    }
+                  }}
+                />
                 <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: "11px" }} />

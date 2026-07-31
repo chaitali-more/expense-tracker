@@ -1,6 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { FaIndianRupeeSign } from "react-icons/fa6";
+import api from "../../api";
 
 import {
     HiArrowTrendingDown,
@@ -24,7 +25,7 @@ const ExpenseForm = ({ setTransactions }) => {
   const [errors, setErrors] = useState({});
   const [successMsg, setSuccessMsg] = useState("");
 
-  const handleSubmit = (formData) => {
+  const handleSubmit = async (formData) => {
     const transactionName = formData.get("transactionName");
     const transactionDate = formData.get("transactionDate");
     const category = formData.get("category");
@@ -57,21 +58,26 @@ const ExpenseForm = ({ setTransactions }) => {
 
     setErrors({});
 
-    setTransactions((prev) => [
-      {
-        id: Date.now(),
-        transactionName,
-        transactionType: "expense",
-        transactionDate,
-        amount,
-        category,
-      },
-      ...prev,
-    ]);
+    const transaction = {
+      title: transactionName,
+      amount,
+      category,
+      type: "expense",
+      date: transactionDate,
+    };
 
-    setSuccessMsg("Expense recorded successfully!");
-    toast.success("Expense added successfully!");
-    setTimeout(() => setSuccessMsg(""), 4000);
+    try {
+      const res = await api.post("/transactions", transaction);
+      if (setTransactions) {
+        setTransactions((prev) => [res.data, ...prev]);
+      }
+      setSuccessMsg("Expense recorded successfully!");
+      toast.success("Expense added successfully!");
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add expense. Please try again.");
+    }
   };
 
   return (

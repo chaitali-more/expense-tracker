@@ -64,7 +64,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
           {/* Mobile Header with Close Button */}
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 lg:hidden">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-xs">
                 <FaWallet className="w-4 h-4" />
               </div>
               <span className="font-bold text-slate-900 text-sm">Finance Tracker Menu</span>
@@ -95,7 +95,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
                     className={({ isActive }) =>
                       `w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-150 cursor-pointer ${
                         isActive
-                          ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20 font-bold"
+                          ? "bg-slate-900 text-white shadow-sm font-bold"
                           : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
                       }`
                     }
@@ -119,18 +119,18 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
 
         {/* Bottom Prodify-style Gradient Card */}
         <div className="p-4 border-t border-slate-100">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-4 text-white shadow-md shadow-emerald-500/20">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-teal-100 uppercase tracking-wider mb-1">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-slate-950 p-4 text-white shadow-md shadow-slate-900/10">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
               <HiSparkles className="w-4 h-4" />
               <span>Smart Finance AI</span>
             </div>
-            <p className="text-xs sm:text-sm font-medium text-teal-50 leading-snug mb-3">
+            <p className="text-xs sm:text-sm font-medium text-slate-200 leading-snug mb-3">
               Get automated expense insights and monthly budget predictions.
             </p>
             <Link
               to="/add-expense"
               onClick={() => setIsMobileOpen(false)}
-              className="block w-full bg-white hover:bg-emerald-50 text-emerald-700 font-bold py-2 px-3 rounded-xl text-xs sm:text-sm shadow-xs transition cursor-pointer text-center"
+              className="block w-full bg-white hover:bg-slate-100 text-slate-950 font-bold py-2 px-3 rounded-xl text-xs sm:text-sm shadow-xs transition cursor-pointer text-center"
             >
               + Quick Entry
             </Link>

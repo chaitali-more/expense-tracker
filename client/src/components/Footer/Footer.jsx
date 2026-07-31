@@ -16,7 +16,7 @@ const Footer = () => {
             href="http://chaitalimore.in/"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition cursor-pointer"
+            className="font-bold text-slate-700 hover:text-slate-900 hover:underline transition cursor-pointer"
           >
             Chaitali More
           </a>

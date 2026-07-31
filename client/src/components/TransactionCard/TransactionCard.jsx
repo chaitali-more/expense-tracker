@@ -17,7 +17,11 @@ import {
 const getCategoryBadge = (category, type) => {
   const cat = (category || "").toLowerCase();
 
-  if (type === "income" || cat.includes("salary") || cat.includes("freelance")) {
+  if (
+    type === "income" ||
+    cat.includes("salary") ||
+    cat.includes("freelance")
+  ) {
     return {
       icon: <HiBanknotes className="w-4 h-4 text-emerald-600" />,
       bg: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
@@ -25,7 +29,11 @@ const getCategoryBadge = (category, type) => {
     };
   }
 
-  if (cat.includes("food") || cat.includes("grocer") || cat.includes("dining")) {
+  if (
+    cat.includes("food") ||
+    cat.includes("grocer") ||
+    cat.includes("dining")
+  ) {
     return {
       icon: <HiBuildingStorefront className="w-4 h-4 text-amber-600" />,
       bg: "bg-amber-50 text-amber-700 border-amber-200/80",
@@ -33,7 +41,11 @@ const getCategoryBadge = (category, type) => {
     };
   }
 
-  if (cat.includes("travel") || cat.includes("flight") || cat.includes("transport")) {
+  if (
+    cat.includes("travel") ||
+    cat.includes("flight") ||
+    cat.includes("transport")
+  ) {
     return {
       icon: <HiTicket className="w-4 h-4 text-blue-600" />,
       bg: "bg-blue-50 text-blue-700 border-blue-200/80",
@@ -58,11 +70,12 @@ const getCategoryBadge = (category, type) => {
   }
 
   return {
-    icon: type === "income" ? (
-      <HiArrowTrendingUp className="w-4 h-4 text-emerald-600" />
-    ) : (
-      <HiArrowTrendingDown className="w-4 h-4 text-red-600" />
-    ),
+    icon:
+      type === "income" ? (
+        <HiArrowTrendingUp className="w-4 h-4 text-emerald-600" />
+      ) : (
+        <HiArrowTrendingDown className="w-4 h-4 text-red-600" />
+      ),
     bg: "bg-slate-100 text-slate-700 border-slate-200",
     label: category || "General",
   };
@@ -76,9 +89,12 @@ const TransactionCard = ({ Transactions = [], onDelete }) => {
           <HiSparkles />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-slate-800">No Transactions Found</h3>
+          <h3 className="text-sm font-bold text-slate-800">
+            No Transactions Found
+          </h3>
           <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            You haven't recorded any entries yet. Click "+ Add Income" or "+ Add Expense" to start tracking!
+            You haven't recorded any entries yet. Click "+ Add Income" or "+ Add
+            Expense" to start tracking!
           </p>
         </div>
       </div>
@@ -88,13 +104,16 @@ const TransactionCard = ({ Transactions = [], onDelete }) => {
   return (
     <div className="space-y-3">
       {Transactions.map((transaction) => {
-        const isIncome = transaction.transactionType === "income";
-        const badgeInfo = getCategoryBadge(transaction.category, transaction.transactionType);
+        const isIncome = transaction.type === "income";
+        const badgeInfo = getCategoryBadge(
+          transaction.category,
+          transaction.type,
+        );
         const amountNum = Number(transaction.amount) || 0;
 
         return (
           <div
-            key={transaction.id}
+            key={transaction._id || transaction.id}
             className="group bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           >
             {/* Left: Icon & Transaction Details */}
@@ -118,7 +137,7 @@ const TransactionCard = ({ Transactions = [], onDelete }) => {
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h4 className="font-semibold text-base sm:text-lg text-slate-900 tracking-tight">
-                    {transaction.transactionName}
+                    {transaction.title}
                   </h4>
                   <span
                     className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border capitalize flex items-center gap-1 ${badgeInfo.bg}`}
@@ -130,11 +149,11 @@ const TransactionCard = ({ Transactions = [], onDelete }) => {
                 <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
                   <span className="flex items-center gap-1">
                     <HiCalendarDays className="w-3.5 h-3.5" />
-                    {transaction.transactionDate}
+                    {new Date(transaction.date).toLocaleDateString("en-GB")}
                   </span>
                   <span>•</span>
                   <span className="capitalize font-semibold text-slate-600">
-                    {transaction.transactionType}
+                    {transaction.type}
                   </span>
                 </div>
               </div>
@@ -156,7 +175,7 @@ const TransactionCard = ({ Transactions = [], onDelete }) => {
 
               {onDelete && (
                 <button
-                  onClick={() => onDelete(transaction.id)}
+                  onClick={() => onDelete(transaction._id)}
                   className="p-2 rounded-xl text-slate-300 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                   title="Delete entry"
                   aria-label="Delete transaction"

@@ -4,7 +4,7 @@ const SearchBar = ({ searchValue, setSearchValue }) => {
   return (
     <div className="relative w-full max-w-md group">
       {/* Magnifying Glass Icon */}
-      <HiMagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-600 transition-colors pointer-events-none" />
+      <HiMagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 group-focus-within:text-slate-700 transition-colors pointer-events-none" />
 
       {/* Input Field */}
       <input
@@ -13,7 +13,7 @@ const SearchBar = ({ searchValue, setSearchValue }) => {
         placeholder="Search transactions by title..."
         name="search"
         onChange={(e) => setSearchValue && setSearchValue(e.target.value)}
-        className="w-full pl-10 pr-9 py-2.5 text-xs font-semibold rounded-xl bg-slate-50/90 border border-slate-200/90 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-xs transition-all duration-200"
+        className="w-full pl-10 pr-9 py-2.5 text-xs font-semibold rounded-xl bg-slate-50/90 border border-slate-200/90 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-400/10 shadow-xs transition-all duration-200"
       />
 
       {/* Clear Search Button (Visible when searching) */}

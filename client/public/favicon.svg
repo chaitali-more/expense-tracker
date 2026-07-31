@@ -10,9 +10,9 @@
   
   <defs>
     <linearGradient id="favicon_grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#059669"/>
-      <stop offset="0.5" stop-color="#0d9488"/>
-      <stop offset="1" stop-color="#0891b2"/>
+      <stop stop-color="#334155"/>
+      <stop offset="0.5" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#020617"/>
     </linearGradient>
   </defs>
 </svg>

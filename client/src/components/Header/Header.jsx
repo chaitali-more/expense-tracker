@@ -9,7 +9,7 @@ const Header = ({ onToggleSidebar }) => {
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo & Branding */}
           <Link to="/" className="flex items-center gap-3 cursor-pointer shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-emerald-500/20 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-xs shrink-0">
               <FaWallet className="w-4 h-4" />
             </div>
             <div>
@@ -30,7 +30,7 @@ const Header = ({ onToggleSidebar }) => {
               className={({ isActive }) =>
                 `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
                   isActive
-                    ? "bg-emerald-50 text-emerald-700 font-bold"
+                    ? "bg-slate-100 text-slate-900 font-bold"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`
               }
@@ -44,7 +44,7 @@ const Header = ({ onToggleSidebar }) => {
               className={({ isActive }) =>
                 `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
                   isActive
-                    ? "bg-emerald-50 text-emerald-700 font-bold"
+                    ? "bg-slate-100 text-slate-900 font-bold"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`
               }
@@ -58,12 +58,12 @@ const Header = ({ onToggleSidebar }) => {
               className={({ isActive }) =>
                 `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
                   isActive
-                    ? "bg-emerald-50 text-emerald-700 font-bold"
+                    ? "bg-slate-100 text-slate-900 font-bold"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`
               }
             >
-              <HiChartBar className="w-4 h-4 text-emerald-600" />
+              <HiChartBar className="w-4 h-4 text-slate-600" />
               <span>Financial Statistics & Analytics</span>
             </NavLink>
           </nav>
@@ -71,7 +71,7 @@ const Header = ({ onToggleSidebar }) => {
           {/* Right: User Avatar + Mobile Toggle Button */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2.5 sm:bg-slate-50 sm:px-3 sm:py-1.5 sm:rounded-full sm:border sm:border-slate-200/60">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+              <div className="w-7 h-7 rounded-full bg-slate-800 text-white font-bold text-xs flex items-center justify-center shadow-xs">
                 C
               </div>
               <span className="hidden sm:block text-xs font-bold text-slate-800 leading-tight">

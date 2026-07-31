@@ -9,21 +9,31 @@ import AddIncomePage from "./pages/AddIncomePage";
 import DashboardPage from "./pages/DashboardPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import TransactionListPage from "./pages/TransactionListPage";
+import api from "./api";
+
+// Helper to get local date object without timezone shifts for date-only inputs
+const getLocalDateObject = (dateStr) => {
+  if (!dateStr) return new Date();
+  
+  const dateString = String(dateStr);
+  if (dateString.length === 10 || dateString.endsWith("T00:00:00.000Z")) {
+    const year = parseInt(dateString.substring(0, 4), 10);
+    const month = parseInt(dateString.substring(5, 7), 10) - 1;
+    const day = parseInt(dateString.substring(8, 10), 10);
+    return new Date(year, month, day);
+  }
+  
+  const d = new Date(dateString);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};
 
 // Helper function to evaluate date range filtering
 const isDateInFilter = (dateStr, dFilter) => {
   if (!dFilter || dFilter === "all") return true;
   if (!dateStr) return false;
 
-  const txDate = new Date(dateStr);
+  const txDay = getLocalDateObject(dateStr);
   const now = new Date();
-
-  // Strip time for clean day comparison
-  const txDay = new Date(
-    txDate.getFullYear(),
-    txDate.getMonth(),
-    txDate.getDate(),
-  );
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   if (dFilter === "today") {
@@ -39,21 +49,21 @@ const isDateInFilter = (dateStr, dFilter) => {
 
   if (dFilter === "month") {
     return (
-      txDate.getFullYear() === now.getFullYear() &&
-      txDate.getMonth() === now.getMonth()
+      txDay.getFullYear() === today.getFullYear() &&
+      txDay.getMonth() === today.getMonth()
     );
   }
 
   if (dFilter === "last_month") {
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     return (
-      txDate.getFullYear() === lastMonth.getFullYear() &&
-      txDate.getMonth() === lastMonth.getMonth()
+      txDay.getFullYear() === lastMonth.getFullYear() &&
+      txDay.getMonth() === lastMonth.getMonth()
     );
   }
 
   if (dFilter === "year") {
-    return txDate.getFullYear() === now.getFullYear();
+    return txDay.getFullYear() === today.getFullYear();
   }
 
   return true;
@@ -66,24 +76,25 @@ const App = () => {
   const [dateFilter, setDateFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date_desc");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const data = localStorage.getItem("Transactions");
-    if (data) {
-      setTransactions(JSON.parse(data));
-    }
-    setIsLoaded(true);
+    // Clear legacy local storage data if any exists to avoid confusion
+    localStorage.removeItem("Transactions");
+    fetchTransactions();
   }, []);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("Transactions", JSON.stringify(Transactions));
-  }, [Transactions]);
+  
 
-  const handleDelete = (id) => {
-    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
-  };
+  const handleDelete = async (id) => {
+  try {
+    await api.delete(`/transactions/${id}`);
+
+    // Fetch latest data from MongoDB
+    fetchTransactions();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   // Combine Search, Type Filter, Date Range Filter, and Date/Amount Sorting
   let filteredArray = Transactions;
@@ -91,53 +102,71 @@ const App = () => {
   // 1. Search Filter
   if (searchValue.trim()) {
     filteredArray = filteredArray.filter((tx) =>
-      tx.transactionName.toLowerCase().includes(searchValue.toLowerCase()),
+      tx.title.toLowerCase().includes(searchValue.toLowerCase()),
     );
   }
 
   // 2. Type Filter (Income / Expense)
   if (filter === "income") {
     filteredArray = filteredArray.filter(
-      (tx) => tx.transactionType === "income",
+      (tx) => tx.type === "income",
     );
   } else if (filter === "expense") {
     filteredArray = filteredArray.filter(
-      (tx) => tx.transactionType === "expense",
+      (tx) => tx.type === "expense",
     );
   }
 
   // 3. Date Range Filter (Today, This Week, This Month, Last Month, This Year)
   if (dateFilter !== "all") {
     filteredArray = filteredArray.filter((tx) =>
-      isDateInFilter(tx.transactionDate, dateFilter),
+      isDateInFilter(tx.date || tx.transactionDate, dateFilter),
     );
   }
 
   // 4. Date Sorting (Default: Date Newest First)
   filteredArray = [...filteredArray].sort((a, b) => {
+    const dateA = a.date || a.transactionDate || 0;
+    const dateB = b.date || b.transactionDate || 0;
+    const idA = a._id || a.id || 0;
+    const idB = b._id || b.id || 0;
+
     if (sortBy === "date_asc") {
-      const timeA = new Date(a.transactionDate || 0).getTime();
-      const timeB = new Date(b.transactionDate || 0).getTime();
+      const timeA = new Date(dateA).getTime();
+      const timeB = new Date(dateB).getTime();
       if (timeA !== timeB) return timeA - timeB;
-      return (a.id || 0) - (b.id || 0);
+      return String(idA).localeCompare(String(idB));
     }
     // Default: date_desc
-    const timeA = new Date(a.transactionDate || 0).getTime();
-    const timeB = new Date(b.transactionDate || 0).getTime();
+    const timeA = new Date(dateA).getTime();
+    const timeB = new Date(dateB).getTime();
     if (timeA !== timeB) return timeB - timeA;
-    return (b.id || 0) - (a.id || 0);
+    return String(idB).localeCompare(String(idA));
   });
 
   const totalIncome = Transactions.filter(
-    (tx) => tx.transactionType === "income",
+    (tx) => tx.type === "income",
   ).reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
   const totalExpense = Transactions.filter(
-    (tx) => tx.transactionType === "expense",
+    (tx) => tx.type === "expense",
   ).reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
   const balance = totalIncome - totalExpense;
 
+  const fetchTransactions = async () => {
+  try {
+    const res = await api.get("/transactions");
+
+    console.log("Response:", res);
+    console.log("Data:", res.data);
+    console.log("Is Array:", Array.isArray(res.data));
+
+    setTransactions(res.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
       {/* Header Bar */}
