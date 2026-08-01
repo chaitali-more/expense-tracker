@@ -1,5 +1,5 @@
 import express from "express";
-
+import protect from "../middleware/authMiddleware.js";
 import {
   addTransaction,
   getTransaction,
@@ -9,13 +9,13 @@ import {
 
 const router = express.Router();
 
-router.post("/", addTransaction);
+router.post("/",protect, addTransaction);
 
-router.get("/", getTransaction);
+router.get("/", protect, getTransaction);
 
-router.put("/:id", updateTransaction);
+router.put("/:id",protect, updateTransaction);
 
-router.delete("/:id", deleteTransaction);
+router.delete("/:id", protect, deleteTransaction);
 
 router.get("/test", (req, res) => {
   res.send("Transaction Route Working");

@@ -10,6 +10,8 @@ const addTransaction = async (req, res) => {
             category,
             type,
             date,
+            user: req.user._id,
+
         });
 
         await transaction.save();
@@ -25,7 +27,9 @@ const addTransaction = async (req, res) => {
 
 const getTransaction = async (req, res) => {
     try {
-        const transactions = await Transaction.find();
+        const transactions = await Transaction.find({
+            user: req.user._id,
+        });
         res.status(200).json(transactions);
     }
     catch (error) {
@@ -40,12 +44,14 @@ const updateTransaction = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const transaction = await Transaction.findByIdAndUpdate(
-            id,
+        const transaction = await Transaction.findOneAndUpdate(
+            {
+                _id: id,
+                user: req.user._id,
+            },
             req.body,
             { new: true }
         );
-
         res.status(200).json(transaction);
     } catch (error) {
         res.status(500).json({
@@ -59,7 +65,10 @@ const deleteTransaction = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const transaction = await Transaction.findByIdAndDelete(id);
+        const transaction = await Transaction.findOneAndDelete({
+            _id: id,
+            user: req.user._id,
+        });
         if (!transaction) {
             return res.status(404).json({
                 message: "Transaction not found",
