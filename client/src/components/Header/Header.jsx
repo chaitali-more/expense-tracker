@@ -1,11 +1,35 @@
-import { Link, NavLink } from "react-router-dom";
-import { HiOutlineBars3, HiChartBar, HiListBullet, HiSquares2X2 } from "react-icons/hi2";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { HiOutlineBars3, HiChartBar, HiListBullet, HiSquares2X2, HiUser } from "react-icons/hi2";
 import { FaWallet } from "react-icons/fa6";
+import toast from "react-hot-toast";
 
 const Header = ({ onToggleSidebar }) => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
+  let userName = "User";
+  try {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user && user.name) {
+        userName = user.name;
+      }
+    }
+  } catch (e) {
+    console.error("Error parsing user from localStorage:", e);
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    toast.success("Logged out successfully.");
+    navigate("/login");
+  };
+
   return (
-    <header className="w-full bg-white border-b border-slate-200/80 sticky top-0 z-40 shadow-xs">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+    <header className={`w-full bg-white border-b border-slate-200/80 sticky top-0 z-40 shadow-xs ${!token ? "px-4 sm:px-8" : ""}`}>
+      <div className={token ? "w-full px-4 sm:px-6 lg:px-8" : "max-w-6xl mx-auto w-full"}>
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo & Branding */}
           <Link to="/" className="flex items-center gap-3 cursor-pointer shrink-0">
@@ -23,70 +47,100 @@ const Header = ({ onToggleSidebar }) => {
           </Link>
 
           {/* Middle: Desktop Quick Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
-                  isActive
-                    ? "bg-slate-100 text-slate-900 font-bold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`
-              }
-            >
-              <HiSquares2X2 className="w-4 h-4" />
-              <span>Dashboard</span>
-            </NavLink>
+          {token && (
+            <nav className="hidden lg:flex items-center gap-1">
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-slate-100 text-slate-900 font-bold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  }`
+                }
+              >
+                <HiSquares2X2 className="w-4 h-4" />
+                <span>Dashboard</span>
+              </NavLink>
 
-            <NavLink
-              to="/transactions"
-              className={({ isActive }) =>
-                `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
-                  isActive
-                    ? "bg-slate-100 text-slate-900 font-bold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`
-              }
-            >
-              <HiListBullet className="w-4 h-4" />
-              <span>Transactions</span>
-            </NavLink>
+              <NavLink
+                to="/transactions"
+                className={({ isActive }) =>
+                  `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-slate-100 text-slate-900 font-bold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  }`
+                }
+              >
+                <HiListBullet className="w-4 h-4" />
+                <span>Transactions</span>
+              </NavLink>
 
-            <NavLink
-              to="/statistics"
-              className={({ isActive }) =>
-                `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
-                  isActive
-                    ? "bg-slate-100 text-slate-900 font-bold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`
-              }
-            >
-              <HiChartBar className="w-4 h-4 text-slate-600" />
-              <span>Financial Statistics & Analytics</span>
-            </NavLink>
-          </nav>
+              <NavLink
+                to="/statistics"
+                className={({ isActive }) =>
+                  `px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-slate-100 text-slate-900 font-bold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  }`
+                }
+              >
+                <HiChartBar className="w-4 h-4 text-slate-600" />
+                <span>Financial Statistics & Analytics</span>
+              </NavLink>
+            </nav>
+          )}
 
-          {/* Right: User Avatar + Mobile Toggle Button */}
+          {/* Right: User Avatar + Action Button */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2.5 sm:bg-slate-50 sm:px-3 sm:py-1.5 sm:rounded-full sm:border sm:border-slate-200/60">
-              <div className="w-7 h-7 rounded-full bg-slate-800 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                C
+            {token ? (
+              <>
+                <div className="flex items-center gap-2.5 sm:bg-slate-50 sm:px-3 sm:py-1.5 sm:rounded-full sm:border sm:border-slate-200/60">
+                  <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center shadow-xs">
+                    <HiUser className="w-4 h-4" />
+                  </div>
+                  <span className="hidden sm:block text-xs font-bold text-slate-800 leading-tight">
+                    {userName}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="px-3.5 py-1.5 text-xs font-bold rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200/60 transition cursor-pointer active:scale-95"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="px-3.5 py-1.5 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition hover:bg-slate-50 cursor-pointer"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-slate-900 hover:bg-slate-800 text-white shadow-xs transition cursor-pointer"
+                >
+                  Sign Up
+                </Link>
               </div>
-              <span className="hidden sm:block text-xs font-bold text-slate-800 leading-tight">
-                Chaitali
-              </span>
-            </div>
+            )}
 
             {/* Mobile Navigation Toggle Button */}
-            <button
-              onClick={onToggleSidebar}
-              className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center justify-center active:scale-95"
-              aria-label="Toggle Navigation Menu"
-            >
-              <HiOutlineBars3 className="w-5 h-5" />
-            </button>
+            {token && (
+              <button
+                onClick={onToggleSidebar}
+                className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition cursor-pointer flex items-center justify-center active:scale-95"
+                aria-label="Toggle Navigation Menu"
+              >
+                <HiOutlineBars3 className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>

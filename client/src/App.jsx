@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Footer from "./components/Footer/Footer";
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -10,11 +10,16 @@ import DashboardPage from "./pages/DashboardPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import TransactionListPage from "./pages/TransactionListPage";
 import api from "./api";
+import SignupPage from "./pages/SignupPage";
+import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicRoute from "./routes/PublicRoute";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 // Helper to get local date object without timezone shifts for date-only inputs
 const getLocalDateObject = (dateStr) => {
   if (!dateStr) return new Date();
-  
+
   const dateString = String(dateStr);
   if (dateString.length === 10 || dateString.endsWith("T00:00:00.000Z")) {
     const year = parseInt(dateString.substring(0, 4), 10);
@@ -22,7 +27,7 @@ const getLocalDateObject = (dateStr) => {
     const day = parseInt(dateString.substring(8, 10), 10);
     return new Date(year, month, day);
   }
-  
+
   const d = new Date(dateString);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 };
@@ -70,31 +75,61 @@ const isDateInFilter = (dateStr, dFilter) => {
 };
 
 const App = () => {
+  // eslint-disable-next-line no-unused-vars
+  const location = useLocation();
   const [Transactions, setTransactions] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [filter, setFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date_desc");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const token = localStorage.getItem("token");
+
+  const fetchTransactions = async () => {
+    try {
+      const res = await api.get("/transactions");
+
+      console.log("Response:", res);
+      console.log("Data:", res.data);
+      console.log("Is Array:", Array.isArray(res.data));
+
+      if (res && res.data && Array.isArray(res.data)) {
+        setTransactions(res.data);
+      } else {
+        console.warn("API returned non-array data, fallback to empty array");
+        setTransactions([]);
+      }
+    } catch (error) {
+      console.log("Error fetching transactions:", error);
+      setTransactions([]);
+    }
+  };
 
   useEffect(() => {
     // Clear legacy local storage data if any exists to avoid confusion
     localStorage.removeItem("Transactions");
-    fetchTransactions();
   }, []);
 
-  
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (token) {
+      fetchTransactions();
+    } else {
+      setTransactions([]);
+    }
+  }, [token]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleDelete = async (id) => {
-  try {
-    await api.delete(`/transactions/${id}`);
+    try {
+      await api.delete(`/transactions/${id}`);
 
-    // Fetch latest data from MongoDB
-    fetchTransactions();
-  } catch (error) {
-    console.log(error);
-  }
-};
+      // Fetch latest data from MongoDB
+      fetchTransactions();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Combine Search, Type Filter, Date Range Filter, and Date/Amount Sorting
   let filteredArray = Transactions;
@@ -108,13 +143,9 @@ const App = () => {
 
   // 2. Type Filter (Income / Expense)
   if (filter === "income") {
-    filteredArray = filteredArray.filter(
-      (tx) => tx.type === "income",
-    );
+    filteredArray = filteredArray.filter((tx) => tx.type === "income");
   } else if (filter === "expense") {
-    filteredArray = filteredArray.filter(
-      (tx) => tx.type === "expense",
-    );
+    filteredArray = filteredArray.filter((tx) => tx.type === "expense");
   }
 
   // 3. Date Range Filter (Today, This Week, This Month, Last Month, This Year)
@@ -144,35 +175,16 @@ const App = () => {
     return String(idB).localeCompare(String(idA));
   });
 
-  const totalIncome = Transactions.filter(
-    (tx) => tx.type === "income",
-  ).reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+  const totalIncome = Transactions.filter((tx) => tx.type === "income").reduce(
+    (sum, tx) => sum + Number(tx.amount || 0),
+    0,
+  );
 
   const totalExpense = Transactions.filter(
     (tx) => tx.type === "expense",
   ).reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
   const balance = totalIncome - totalExpense;
-
-  const fetchTransactions = async () => {
-  try {
-    const res = await api.get("/transactions");
-
-    console.log("Response:", res);
-    console.log("Data:", res.data);
-    console.log("Is Array:", Array.isArray(res.data));
-
-    if (res && res.data && Array.isArray(res.data)) {
-      setTransactions(res.data);
-    } else {
-      console.warn("API returned non-array data, fallback to empty array");
-      setTransactions([]);
-    }
-  } catch (error) {
-    console.log("Error fetching transactions:", error);
-    setTransactions([]);
-  }
-};
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
       {/* Header Bar */}
@@ -186,10 +198,12 @@ const App = () => {
       {/* Main Dashboard Layout */}
       <div className="flex-1 flex w-full">
         {/* Sidebar Navigation */}
-        <Sidebar
-          isMobileOpen={isMobileOpen}
-          setIsMobileOpen={setIsMobileOpen}
-        />
+        {token && (
+          <Sidebar
+            isMobileOpen={isMobileOpen}
+            setIsMobileOpen={setIsMobileOpen}
+          />
+        )}
 
         {/* Main Content & Footer Panel */}
         <div className="flex-1 flex flex-col min-w-0 min-h-[calc(100vh-4rem)]">
@@ -199,43 +213,83 @@ const App = () => {
                 <Route
                   path="/"
                   element={
-                    <DashboardPage
-                      Transactions={Transactions}
-                      handleDelete={handleDelete}
-                      balance={balance}
-                      totalIncome={totalIncome}
-                      totalExpense={totalExpense}
-                    />
+                    <ProtectedRoute>
+                      <DashboardPage
+                        Transactions={Transactions}
+                        handleDelete={handleDelete}
+                        balance={balance}
+                        totalIncome={totalIncome}
+                        totalExpense={totalExpense}
+                      />
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/add-income"
-                  element={<AddIncomePage setTransactions={setTransactions} />}
+                  element={
+                    <ProtectedRoute>
+                      <AddIncomePage setTransactions={setTransactions} />
+                    </ProtectedRoute>
+                  }
                 />
                 <Route
                   path="/add-expense"
-                  element={<AddExpensePage setTransactions={setTransactions} />}
+                  element={
+                    <ProtectedRoute>
+                      <AddExpensePage setTransactions={setTransactions} />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <PublicRoute>
+                      <SignupPage />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/login"
+                  element={
+                    <PublicRoute>
+                      <LoginPage />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/forgot-password"
+                  element={
+                    <PublicRoute>
+                      <ForgotPasswordPage />
+                    </PublicRoute>
+                  }
                 />
                 <Route
                   path="/transactions"
                   element={
-                    <TransactionListPage
-                      Transactions={filteredArray}
-                      handleDelete={handleDelete}
-                      setSearchValue={setSearchValue}
-                      searchValue={searchValue}
-                      setFilter={setFilter}
-                      filter={filter}
-                      dateFilter={dateFilter}
-                      setDateFilter={setDateFilter}
-                      sortBy={sortBy}
-                      setSortBy={setSortBy}
-                    />
+                    <ProtectedRoute>
+                      <TransactionListPage
+                        Transactions={filteredArray}
+                        handleDelete={handleDelete}
+                        setSearchValue={setSearchValue}
+                        searchValue={searchValue}
+                        setFilter={setFilter}
+                        filter={filter}
+                        dateFilter={dateFilter}
+                        setDateFilter={setDateFilter}
+                        sortBy={sortBy}
+                        setSortBy={setSortBy}
+                      />
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/statistics"
-                  element={<StatisticsPage Transactions={Transactions} />}
+                  element={
+                    <ProtectedRoute>
+                      <StatisticsPage Transactions={Transactions} />
+                    </ProtectedRoute>
+                  }
                 />
               </Routes>
             </div>
