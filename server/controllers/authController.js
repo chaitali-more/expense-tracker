@@ -57,7 +57,7 @@ const loginUser = async (req, res) => {
             {
                 id: findUser._id,
             },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || "myPersonalExpenseTracker8734",
             {
                 expiresIn: "7d",
             }
