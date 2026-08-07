@@ -9,12 +9,13 @@ import SEO from "../components/SEO/SEO";
 const SignupPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const SignupSubmit = async (formData) => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
     setLoading(true);
-    const name = formData.get("name");
-    const email = formData.get("email");
-    const password = formData.get("password");
     const user = {
       name,
       email,
@@ -54,7 +55,7 @@ const SignupPage = () => {
         </div>
 
         {/* Form */}
-        <form action={SignupSubmit} className="space-y-4">
+        <form onSubmit={handleSignup} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
               Full Name
@@ -63,6 +64,8 @@ const SignupPage = () => {
               type="text"
               name="name"
               placeholder="Chaitali More"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
               className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all duration-150"
             />
@@ -76,6 +79,8 @@ const SignupPage = () => {
               type="email"
               name="email"
               placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all duration-150"
             />
@@ -89,6 +94,8 @@ const SignupPage = () => {
               type="password"
               name="password"
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all duration-150"

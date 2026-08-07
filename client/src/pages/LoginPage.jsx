@@ -9,11 +9,12 @@ import SEO from "../components/SEO/SEO";
 const LoginPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const SignInForm = async (formData) => {
+  const handleSignIn = async (e) => {
+    e.preventDefault();
     setLoading(true);
-    const email = formData.get("email");
-    const password = formData.get("password");
 
     const user = {
       email,
@@ -58,7 +59,7 @@ const LoginPage = () => {
         </div>
 
         {/* Form */}
-        <form action={SignInForm} className="space-y-4">
+        <form onSubmit={handleSignIn} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
               Email Address
@@ -67,6 +68,8 @@ const LoginPage = () => {
               type="email"
               name="email"
               placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all duration-150"
             />
@@ -88,6 +91,8 @@ const LoginPage = () => {
               type="password"
               name="password"
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all duration-150"
             />
